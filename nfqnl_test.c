@@ -9,7 +9,7 @@
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
 int flag=0;
-
+char juso[255];
 void dump(unsigned char* buf, int size) {//void 반환형의 dump. unsigned char 포인터형 변수 buf, int자료형의 size를 인자로 받음.
 	int i;//변수 i 선언
 	for (i = 0; i < size; i++) { //size 만큼 반복하는 반복문
@@ -73,13 +73,15 @@ static u_int32_t print_pkt (struct nfq_data *tb) //한번 선언되면 초기화
 		//printf("======\n");
 		int k=(data[0]&0x0F)*4;
 		int k1=(data[12+k]>>4)*4;
-		if(((data[k]<<8)|data[1+k])==80 || ((data[2+k]<<8)|data[3+k])== 80)
+	//	int b = memcmp(data[k+k1+26],juso,strlen(juso));	
+		if((((data[k]<<8)|data[1+k])==80 || ((data[2+k]<<8)|data[3+k])== 80)&&(0x474554==(data[k+k1]<<16|data[1+k+k1]<<8|data[2+k+k1])))
 		{
 			
 		printf("\n======\n");
-		flag = 1;
-		printf("TCP+port80\n");
+		printf("TCP+port80+GET\n");
 		printf("\n======\n");
+		flag = 1;
+	//	printf("memcmp results : %d\n",b);
 		}
 	}
 	else
@@ -119,7 +121,7 @@ int main(int argc, char **argv)
 	int fd;//int fd 선언
 	int rv;//int rv 선언
 	char buf[4096] __attribute__ ((aligned));//char buf[4096] 배열선언 aligned 된 __attribute__
-
+	scanf("%s",juso);
 	printf("opening library handle\n");
 	h = nfq_open();//h에 nfq_open()넣음
 	if (!h) {//h가 거짓. 즉 open안됬으면 에러출력
