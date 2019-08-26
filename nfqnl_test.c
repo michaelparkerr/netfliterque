@@ -73,7 +73,7 @@ static u_int32_t print_pkt (struct nfq_data *tb) //한번 선언되면 초기화
 		//printf("======\n");
 		int k=(data[0]&0x0F)*4;
 		int k1=(data[12+k]>>4)*4;
-	//	int b = memcmp(data[k+k1+26],juso,strlen(juso));	
+		int b = memcmp(data[k+k1+26],juso,strlen(juso));	
 		if((((data[k]<<8)|data[1+k])==80 || ((data[2+k]<<8)|data[3+k])== 80)&&(0x474554==(data[k+k1]<<16|data[1+k+k1]<<8|data[2+k+k1])))
 		{
 			
