@@ -5,11 +5,14 @@
 #include <linux/types.h>
 #include <linux/netfilter.h>		/* for NF_ACCEPT */
 #include <errno.h>
+#include <string.h>
 
 #include <libnetfilter_queue/libnetfilter_queue.h>
 
-int flag=0;
+int flag;
 char juso[255];
+int c;
+int e = 0;
 void dump(unsigned char* buf, int size) {//void 반환형의 dump. unsigned char 포인터형 변수 buf, int자료형의 size를 인자로 받음.
 	int i;//변수 i 선언
 	for (i = 0; i < size; i++) { //size 만큼 반복하는 반복문
@@ -66,6 +69,7 @@ static u_int32_t print_pkt (struct nfq_data *tb) //한번 선언되면 초기화
 //ret에 nfq_get_payload의 tb와 &data값을 넣은 결과 값을 넣고
 	ret = nfq_get_payload(tb, &data);
 	dump(data, ret);//ret길이만큼 data를 dump
+
 	if (data[9]==6)
 	{
 		//printf("\n======\n");
@@ -73,12 +77,77 @@ static u_int32_t print_pkt (struct nfq_data *tb) //한번 선언되면 초기화
 		//printf("======\n");
 		int k=(data[0]&0x0F)*4;
 		int k1=(data[12+k]>>4)*4;
-		int b = memcmp(data[k+k1+26],juso,strlen(juso));	
-		if((((data[k]<<8)|data[1+k])==80 || ((data[2+k]<<8)|data[3+k])== 80)&&(0x474554==(data[k+k1]<<16|data[1+k+k1]<<8|data[2+k+k1])))
+		e = 0;
+		flag=0;
+		c = -1;
+		printf("\n%d",strlen(juso));
+	/*	if(strstr(juso,"://"))
+		{
+			printf("\n===================*********\n");
+
+			char* result=strtok(juso,"://");
+			result = strtok(NULL,"://");
+			printf("%d : %d : %d",ret,k,k1);
+			if(ret>=(k+k1+22))
+			{
+				for(int i = 0; i< strlen(result); i++)
+				{
+					if(result[i] == data[k+k1+i+22])
+					{
+						e+=1;
+						printf("http e value: %d",e);
+					}
+				}
+			}
+			if(e!=strlen(result))
+			{
+				c=0;
+				printf("\ncase http://=true");
+				
+			}
+			if(e==strlen(result))
+			{
+
+				printf("\ncase http://=false");
+				c=1;
+			}
+		
+		}
+		else
+		{*/
+		if(ret>=(k+k1+22))
+		{
+		for(int i = 0; i < strlen(juso); i++)
+		{
+			if(juso[i]==data[k+k1+i+22])
+			{
+				e+=1;
+			//	printf("\njuso:%02x,data:%02x",juso[i],data[k+k1+i+22]);
+			//	printf("\ne:%d",e);
+			}
+		
+		
+		
+		if(e!=strlen(juso))
+		{
+			c=0;
+		//	printf("\nc=true");
+		}
+		if(e==strlen(juso))
+		{
+			c=1;
+		//	printf("\nc=false");
+		}
+		
+		}
+		}
+	//	}
+		//printf("\nc:%d",c);
+		if((((data[2+k]<<8)|data[3+k])== 80)&&(0x474554==(data[k+k1]<<16|data[1+k+k1]<<8|data[2+k+k1]))&&c)
 		{
 			
 		printf("\n======\n");
-		printf("TCP+port80+GET\n");
+		printf("WAF");
 		printf("\n======\n");
 		flag = 1;
 	//	printf("memcmp results : %d\n",b);
